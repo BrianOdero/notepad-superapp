@@ -22,7 +22,7 @@ export default function LoginSignup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const API_BASE = "http://192.168.0.15:3000"; // your backend URL (use LAN IP for physical device)
+  const API_BASE = process.env.EXPO_PUBLIC_API_BASE;
 
   useEffect(() => {
     if (isLoginParam === "false") {
@@ -31,7 +31,7 @@ export default function LoginSignup() {
       setIsLogin(true);
     }
 
-    authStatus()
+    checkAuthStatus();
   }, [isLoginParam]);
 
   const loginAction = async () => {
@@ -42,10 +42,20 @@ export default function LoginSignup() {
       });
 
       const token = res.data.token;
-      await AsyncStorage.setItem("token", token);
+      const username = res.data.username;
+      
+      
+      // Store both token and username
+      await AsyncStorage.multiSet([
+        ["token", token],
+        ["username", username]
+      ]);
 
       Alert.alert("Success", "Logged in successfully!");
-      router.push("/(auth)/homepage"); // navigate to notes screen
+      router.replace({
+        pathname: "/(auth)/homepage",
+        params: { username }
+      });
     } catch (err) {
       const error = err as any;
       console.error(error);
@@ -65,10 +75,19 @@ export default function LoginSignup() {
       });
 
       const token = res.data.token;
-      await AsyncStorage.setItem("token", token);
+      const username = res.data.username;
+      
+      // Store both token and username
+      await AsyncStorage.multiSet([
+        ["token", token],
+        ["username", username]
+      ]);
 
       Alert.alert("Success", "Registered successfully!");
-      router.push("/(auth)/homepage");
+      router.replace({
+        pathname: "/(auth)/homepage",
+        params: { username }
+      });
     } catch (err) {
       const error = err as any;
       console.error(error);
@@ -76,10 +95,18 @@ export default function LoginSignup() {
     }
   };
 
-  const authStatus = async () => {
-    const token = await AsyncStorage.getItem("token");
-    if (token) {
-      router.push("/(auth)/homepage");
+  const checkAuthStatus = async () => {
+    try {
+      const [token, username] = await AsyncStorage.multiGet(["token", "username"]);
+      
+      if (token[1]) {
+        router.replace({
+          pathname: "/(auth)/homepage",
+          params: { username: username[1] || "" }
+        });
+      }
+    } catch (error) {
+      console.error("Auth check error:", error);
     }
   };
 
