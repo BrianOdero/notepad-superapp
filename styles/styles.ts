@@ -177,6 +177,7 @@ export const homepageStyle = () =>
       paddingBottom: 100,
     },
     noteCard: {
+        minHeight:100,
       width: "48%",
       backgroundColor: "white",
       borderRadius: 12,
@@ -191,6 +192,19 @@ export const homepageStyle = () =>
       justifyContent: "space-between",
       alignItems: "flex-start",
     },
+    notecardEditButtons: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    height: "100%",  // Important to take full height
+  },
+  editButtonTop: {
+    marginTop: 5,  // Space from top
+  },
+  editButtonBottom: {
+    marginBottom: 5,  // Space from bottom
+    alignSelf: "flex-end",  // Ensure it stays at the bottom
+  },
     noteContent: {
       flex: 1,
       marginRight: 8,

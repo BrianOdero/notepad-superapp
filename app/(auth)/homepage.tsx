@@ -1,6 +1,6 @@
 "use client"
 
-import { View, Text, ScrollView, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator, RefreshControl } from "react-native"
+import { View, Text, ScrollView, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator, RefreshControl, Alert } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { homepageStyle } from "@/styles/styles"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -53,6 +53,36 @@ export default function Homepage() {
     }
   }
 
+  const deleteNote = async (id: number) => {
+    try {
+      const token = await AsyncStorage.getItem("token")
+      Alert.alert("Delete Note", "Are you sure you want to delete this note?", [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            await axios.delete(`${API_BASE}/notes/${id}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            })
+            Alert.alert("Success", "Note deleted successfully!")
+            fetchNotes()
+          },
+          style: "destructive",
+        },
+        
+      ])
+      
+      fetchNotes()
+    } catch (error) {
+      console.error("Error deleting note:", error)
+    }
+  }
+
    const onRefresh = () => {
     setRefreshing(true)
     fetchNotes()
@@ -93,32 +123,36 @@ export default function Homepage() {
     const color = getPriorityColor(note.priority)
 
     return (
-      <TouchableOpacity key={note.id} style={styles.noteCard}>
+      <View key={note.id} style={styles.noteCard}>
         <View style={styles.noteContent}>
-          <Text style={styles.noteTitle}>{note.title}</Text>
-          <Text style={styles.notePreview}>{note.content}</Text>
-          <View style={styles.priorityContainer}>
+            <Text style={styles.noteTitle}>{note.title}</Text>
+            <Text style={styles.notePreview}>{note.content}</Text>
+            <View style={styles.priorityContainer}>
             <View style={[styles.priorityDot, { backgroundColor: color }]} />
             <Text style={[styles.priorityText, { color }]}>{note.priority.toUpperCase()}</Text>
-          </View>
+            </View>
         </View>
-        <TouchableOpacity
-          key={note.id}
-          onPress={() => {
-            router.push({
-              pathname: "/(auth)/[id]",
-              params: {
-                id: note.id, // Pass the note ID
-                title: note.title,
-                content: note.content,
-                priority: note.priority
-              }
-            })
-          }}
-        >
-          <Ionicons name="pencil" size={16} color="black" />
-        </TouchableOpacity>
-      </TouchableOpacity>
+        <View style={styles.notecardEditButtons}>
+            <TouchableOpacity style={styles.editButtonTop} onPress={(e) => {
+                router.push({
+                    pathname: `/(auth)/${note.id}` as any,
+                    params: {
+                        title: note.title,
+                        content: note.content,
+                        priority: note.priority,
+                        color: note.color,
+                    },
+                });
+                }
+            }>
+                <Ionicons name="pencil" size={16} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.editButtonBottom} onPress={(e) => {deleteNote(note.id); e.stopPropagation()}}>
+            <Ionicons name="trash" size={16} color="red" />
+            </TouchableOpacity>
+        </View>
+</View>
     )
   }
 
