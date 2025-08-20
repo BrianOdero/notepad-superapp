@@ -75,7 +75,8 @@ export default function EditNoteScreen() {
       )
 
       Alert.alert("Success", "Note updated successfully!")
-      router.back()
+      router.replace("/(auth)/homepage")
+      
     } catch (error: any) {
       console.error("Update error:", error)
       let errorMessage = "Failed to update note"
