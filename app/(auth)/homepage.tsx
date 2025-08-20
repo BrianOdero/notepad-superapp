@@ -8,6 +8,7 @@ import { useLocalSearchParams, useRouter } from "expo-router"
 import axios from "axios"
 import { API_BASE } from "@/constants/constants"
 import { useEffect, useState } from "react"
+import Modal  from "react-native-modal"
 
 interface Note {
   id: number
@@ -22,6 +23,11 @@ export default function Homepage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
 
+  //states for modal functionality
+  const [isModalVisible, setIsModalVisible] = useState(false)
+  const [aiPrompt, setAiPrompt] = useState("")
+  const [isGenerating, setIsGenerating] = useState(false)
+
   const router = useRouter()
   const params = useLocalSearchParams()
 
@@ -33,6 +39,52 @@ export default function Homepage() {
 
   const handleAddNote = async () => {
     router.push("/(auth)/createNotes")
+  }
+
+  //allowing searching using the search bar
+  const handleSearch = (text: string) => {
+    const filteredNotes = notes.filter((note) =>
+      note.title.toLowerCase().includes(text.toLowerCase())
+    )
+    setNotes(filteredNotes)
+  }
+
+  //handling ai generation
+  const generateAiNote = async () => {
+    if (!aiPrompt.trim()){
+      Alert.alert("Validation Error", "Please enter a prompt")
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const token = await AsyncStorage.getItem("token")
+      const res: { data: Note } = await axios.post(`${API_BASE}/notes/ai/generate`, {
+        prompt: aiPrompt
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      router.push({
+        pathname: "/(auth)/createNotes",
+        params: {
+          title: res.data.title,
+          content: res.data.content,
+          aiGenerated: "true"
+        }
+      })
+
+      setIsModalVisible(false)
+      setAiPrompt("")
+      setIsGenerating(false)
+      }
+     catch (error) {
+      console.log("AI gneration error",error)
+      Alert.alert("Error", "Failed to generate note")
+      setIsGenerating(false)
+    }
   }
 
   const fetchNotes = async () => {
@@ -166,7 +218,7 @@ export default function Homepage() {
       </View>
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="#9CA3AF" style={styles.searchIcon} />
-        <TextInput style={styles.searchInput} placeholder="Search notes..." placeholderTextColor="#9CA3AF" />
+        <TextInput style={styles.searchInput} placeholder="Search notes..." placeholderTextColor="#9CA3AF" onChangeText={handleSearch} />
         <Ionicons name="options" size={20} color="#9CA3AF" />
       </View>
       <ScrollView 
@@ -191,9 +243,52 @@ export default function Homepage() {
           <View style={styles.notesGrid}>{notes.map(renderNoteCard)}</View>
         )}
       </ScrollView>
+
       <TouchableOpacity style={styles.addButton} onPress={handleAddNote}>
         <Ionicons name="add" size={24} color="white" />
       </TouchableOpacity>
+
+      <TouchableOpacity style={styles.aiButton} onPress={() => setIsModalVisible(true)}>
+        <Ionicons name="sparkles" size={24} color="white" />
+      </TouchableOpacity>
+
+        <Modal isVisible={isModalVisible} onBackdropPress={() => setIsModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Generate Note with AI</Text>
+            <TextInput
+              style={styles.promptInput}
+              placeholder="Describe what you want in your note..."
+              value={aiPrompt}
+              onChangeText={setAiPrompt}
+              multiline
+              numberOfLines={4}
+            />
+            
+            {isGenerating ? (
+              <View style={styles.generatingContainer}>
+                <ActivityIndicator size="small" color="#3B82F6" />
+                <Text style={styles.generatingText}>Generating...</Text>
+              </View>
+            ) : (
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.modalButtonCancel]}
+                  onPress={() => setIsModalVisible(false)}
+                >
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.modalButtonGenerate]}
+                  onPress={generateAiNote}
+                  disabled={!aiPrompt.trim()}
+                >
+                  <Text style={styles.modalButtonText}>Generate</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </Modal>
+
     </SafeAreaView>
   )
 }

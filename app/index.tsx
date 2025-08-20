@@ -21,7 +21,6 @@ export default function Index() {
   const handleCompleteOnboarding = async () => {
     try {
       await AsyncStorage.setItem("onboardingComplete", "true");
-      console.log("Onboarding successfully completed.");
     } catch (error) {
       console.error("Error saving onboarding complete:", error);
     }

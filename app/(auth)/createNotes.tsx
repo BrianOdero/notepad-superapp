@@ -4,7 +4,7 @@ import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Aler
 import { Ionicons } from "@expo/vector-icons"
 import { useState } from "react"
 import { createNotesStyle } from "@/styles/styles"
-import { useRouter } from "expo-router"
+import { useRouter , useLocalSearchParams } from "expo-router"
 import axios from "axios"
 import { API_BASE } from "@/constants/constants"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -17,12 +17,17 @@ interface CreateNoteScreenProps {
 }
 
 export default function CreateNoteScreen({ onSave, onCancel }: CreateNoteScreenProps) {
-  const [title, setTitle] = useState("")
-  const [content, setContent] = useState("")
+
+  const params = useLocalSearchParams();
+
+  const [title, setTitle] = useState(params.title ? String(params.title) : "");
+  const [content, setContent] = useState(params.content ? String(params.content) : "");
   const [priority, setPriority] = useState<Priority>("medium")
 
   const styles = createNotesStyle()
   const router = useRouter()
+
+  
 
   const priorityOptions: { value: Priority; label: string; color: string }[] = [
     { value: "low", label: "Low", color: "#10B981" },

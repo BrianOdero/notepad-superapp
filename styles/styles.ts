@@ -177,7 +177,7 @@ export const homepageStyle = () =>
       paddingBottom: 100,
     },
     noteCard: {
-        minHeight:100,
+      height:200,
       width: "48%",
       backgroundColor: "white",
       borderRadius: 12,
@@ -282,7 +282,76 @@ export const homepageStyle = () =>
       color: "#6B7280",
       textAlign: "center",
     },
-  })
+    modalContainer: {
+      backgroundColor: "white",
+      padding: 20,
+      borderRadius: 10,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      marginBottom: 15,
+      textAlign: "center",
+    },
+    promptInput: {
+      borderWidth: 1,
+      borderColor: "#ddd",
+      borderRadius: 8,
+      padding: 10,
+      marginBottom: 15,
+      minHeight: 100,
+      textAlignVertical: "top",
+    },
+    modalButtons: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+    },
+    modalButton: {
+      padding: 10,
+      borderRadius: 5,
+      minWidth: 100,
+      alignItems: "center",
+    },
+    modalButtonCancel: {
+      backgroundColor: "#ef4444",
+    },
+    modalButtonGenerate: {
+      backgroundColor: "#3B82F6",
+    },
+    modalButtonText: {
+      color: "white",
+      fontWeight: "bold",
+    },
+    generatingContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 10,
+    },
+    generatingText: {
+      marginLeft: 10,
+      color: "#3B82F6",
+    },
+    aiButton: {
+      position: "absolute",
+      bottom: 100,
+      right: 30,
+      backgroundColor: "#8b5cf6",
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+      })
 
 
 
